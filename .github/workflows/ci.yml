@@ -14,14 +14,14 @@ jobs:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           repository: 'west2-online/fzuhelper-app'
-          ref: 'dependabot/npm_and_yarn/tar-7.5.3'
+          ref: 'master'
           fetch-depth: 0
 
       - name: Restore Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ${{ github.workspace }}/node_modules
@@ -44,8 +44,8 @@ jobs:
           repository: linrongda/eas-cli
           latest: true
           tag: local-submit-v1
-          fileName: eas-cli.tar.gz
-          out-file-path: eas-cli
+          fileName: eas-cli_new.tar.gz
+          out-file-path: eas-cli_new
           extract: true
 
       - name: Compute and Inject buildNumber
@@ -55,7 +55,7 @@ jobs:
 
       - name: EAS Build iOS
         run: |
-          node ./eas-cli/eas/bin/run build --platform ios --profile production --non-interactive --local --output=./build/fzuhelper.ipa
+          node ./eas-cli_new/packages/eas-cli/bin/run build --platform ios --profile production --non-interactive --local --output=./build/fzuhelper.ipa
 
       - name: Upload to Github Artifacts
         uses: actions/upload-artifact@v4
