@@ -12,10 +12,15 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           repository: linrongda/eas-cli
           ref: feat/submit-by-local-machine
+
+      - name: Enable Corepack and prepare Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@4.12.0 --activate
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -25,28 +30,18 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install python-setuptools
-          yarn install --frozen-lockfile --check-files
-        env:
-          HOMEBREW_NO_AUTO_UPDATE: 1
+          yarn install --immutable
 
       - name: Build EAS CLI
-        run: yarn build
+        run: yarn build 
 
-      - name: Build tarballs
-        working-directory: ${{ github.workspace }}/packages/eas-cli
+      - name: Pack EAS CLI
         run: |
-          yarn pretarball-ci
-          yarn oclif pack:tarballs --no-xz --targets darwin-arm64
+          tar -czf eas-cli.tar.gz eas-cli/
+        working-directory: ${{ github.workspace }}/packages
 
-      - name: Move darwin-arm64 tarball to artifact folder
-        run: |
-          filename=$(ls eas-*-arm64.tar.gz)
-          mv $filename ${{ github.workspace }}/packages/eas-cli/dist/eas-cli.tar.gz
-        working-directory: ${{ github.workspace }}/packages/eas-cli/dist
-
-      - name: Upload darwin-arm64 tarball
-        uses: actions/upload-artifact@v4
+      - name: Upload EAS CLI tarball
+        uses: actions/upload-artifact@v7
         with:
-          path: packages/eas-cli/dist/eas-cli.tar.gz
+          path: packages/eas-cli.tar.gz
           name: eas-cli
